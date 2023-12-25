@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Nicolaas Roets CV">
+    <meta name="keywords" content="Roets, Nicolaas, NJ Roets, NJ Roets CV, Nicolaas Roets CV, Niclaas, Niclaas Roets, Niclaas Roets CV, atWORK, atwork, Aros">
+    <meta name="author" content="Nicolaas Roets">
+    <meta http-equiv="refresh" content="30">
+    
+    <title>NJ Roets CV</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: white;
+        }
+
+        section {
+            margin: 20px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        p {
+            line-height: 1.6;
+            color: #666;
+        }
+        #header1 {
+  background-color: lightblue;
+  color: black;
+  padding: 40px;
+  text-align: center;
+    </style>
+    <link rel="icon" type="image/x-icon" href="favicon.jpg">
+</head>
+
+<body>
+
+    <header>
+        <h1 id="header1" >Niclaas <br>
+        Nicolaas Johannes Roets <br>
+        Curriculum Vitae <br>
+        </h1>
+    </header>
+  <form>
+            <input type="button" value="Go back!" onclick="window.location.href='https://njroets.github.io/'">
+        </form> 
+    <section>
+        <h2>Personal information</h2>
+        <p>Nicolaas Johannes Roets <br>
+            South African identification number: 7702255003083 <br>
+            Date of birth: 25 February 1977 <br>
+            Marital Status: Married <br>
+            Address: Villieria, Pretoria, South Africa</p>
+        
+
+        <h2> Highest Qualifications: </h2>
+        <p>M. Com (Accounting Science) <i>University of P
+
+        <h2>Resume</h2>
+        <div>
+            <input type="checkbox" id="toggle" name="toggle" onclick="toggleResume()">
+            <label for="toggle">Toggle Resume</label>
+        </div>
+        <div id="fullResume">
+            <p>Full Resume</p>
+            <p>Insert full resume here.</p>
+        </div>
+        <div id="summarizedResume">
+            <p>Summarized Resume</p>
+            <p>Insert summarized resume here.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2023 Niclaas (NJ) Roets</p>
+    </footer>
+
+    <script>
+        function toggleResume() {
+            var fullResume = document.getElementById("fullResume");
+            var summarizedResume = document.getElementById("summarizedResume");
+            if (document.getElementById("toggle").checked) {
+                fullResume.style.display = "none";
+                summarizedResume.style.display = "block";
+            } else {
+                fullResume.style.display = "block";
+                summarizedResume.style.display = "none";
+            }
+        }
+    </script>
+
+</body>
+
+</html>
