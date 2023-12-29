@@ -44,6 +44,8 @@
   text-align: center;
     </style>
     <link rel="icon" type="image/x-icon" href="favicon.jpg">
+<!-- Include html2pdf library -->
+  <script src="https://rawgit.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
 </head>
 
 <body>
@@ -58,6 +60,9 @@
   <form>
             <input type="button" value="Home" onclick="window.location.href='https://njroets.github.io/'">
         </form> 
+    <button onclick="printPage()" class="btn btn-primary">Print Page</button>
+<button onclick="emailAsPDF()" class="btn btn-secondary">Email as PDF</button>
+    
     <section>
         <h2>Personal information</h2>
         <p>Nicolaas Johannes Roets <br>
@@ -160,7 +165,29 @@ Corporate governance<br></p>
         <form>
             <input type="button" value="Home" onclick="window.location.href='https://njroets.github.io/'">
         </form> 
+<script>
+  function printPage() {
+    window.print();
+  }
 
+  function emailAsPDF() {
+    // Use html2pdf library to create a PDF from the entire page
+    html2pdf(document.body, {
+      margin: 10,
+      filename: 'your_document.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).then(function (pdf) {
+      // Use the generated PDF for further actions, like sending via email
+      // For demonstration purposes, you can open the PDF in a new window
+      var pdfWindow = window.open('', '_blank');
+      pdfWindow.document.write('<html><head><title>PDF</title></head><body style="margin:0;">');
+      pdfWindow.document.write('<embed width="100%" height="100%" src="' + pdf.output('datauristring') + '"></embed>');
+      pdfWindow.document.write('</body></html>');
+    });
+  }
+</script>
     <footer>
         <p>&copy; 2023 Niclaas (NJ) Roets</p>
     </footer>
