@@ -43,11 +43,40 @@
             padding: 20px;
             text-align: center;
         }
+          /* New styles for the menu ribbon */
+        .menu-ribbon {
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #ddd; /* Change this color as needed */
+            padding: 10px;
+            text-align: center;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .menu-ribbon a {
+            display: inline-block;
+            margin: 0 15px;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .menu-ribbon a:hover {
+            color: #666;
+        }
     </style>
 </head>
  
 
     <body>
+         <!-- Menu ribbon with sections -->
+    <div class="menu-ribbon">
+        <a href="#introduction">Introduction</a>
+        <a href="#background">Background</a>
+        <a href="#research-focus">Research Focus</a>
+        <a href="#literature-review">Literature Review</a>
+    </div>
       <header>
         <h1>Governance of Christian Higher Education in South Africa</h1>
     </header>
