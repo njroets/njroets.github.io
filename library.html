@@ -1,10 +1,60 @@
 <!DOCTYPE html>
-<html> 
-  <head>
-  <title>LIBRARY</title>
-  </head>
-  <body>
-  <h1>My Library</h1>
-  <p>List of books</p>
-  </body>
-  </html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Library</h1>
+    <table>
+        <tr>
+            <th>Document Name</th>
+            <th>Download</th>
+        </tr>
+        <tr>
+            <td>Kerk en Woord</td>
+            <td><a href="KW20240102.pdf" download>Download</a></td>
+        </tr>
+        <tr>
+            <td>Flight Itinerary</td>
+            <td><a href="your_document_url_here" download>Download</a></td>
+        </tr>
+        <tr>
+            <td>Hotel Booking Confirmation</td>
+            <td><a href="your_document_url_here" download>Download</a></td>
+        </tr>
+        <!-- Add more documents as needed -->
+        <tr>
+            <th>Document Type</th>
+            <th>Download</th>
+        </tr>
+        <tr>
+            <td>Rozelle Roets ID (PDF)</td>
+            <td><a href="Rozelle Roets RSA ID document.pdf" target="_blank">Download PDF</a></td>
+        </tr>
+        <tr>
+            <td>Packing List (Word)</td>
+            <td><a href="path/to/your/packing_list.docx" target="_blank">Download Word</a></td>
+        </tr>
+    </table>
+</body>
+</html>
