@@ -1,29 +1,61 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Travel Docs</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            text-align: left;
-            padding: 8px;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .menu-bar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        background-color: #ddd;
+        padding: 10px;
+        text-align: right;
+        z-index: 1000;
+      }
+      .menu-bar a {
+        margin-left: 15px;
+        color: #333;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .menu-bar a:hover {
+        color: #666;
+      }
+      h1 {
+        margin-top: 70px;
+        text-align: center;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 30px;
+      }
+      th, td {
+        border: 1px solid #ddd;
+        text-align: left;
+        padding: 8px;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
     </style>
 </head>
 <body>
+    <div class="menu-bar">
+      <a href="traveldoc.html">Family Zone</a>
+      <a href="library.html">My Library</a>
+      <a href="home-loan-calculator.html">Home Loan Calculator</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </div>
     <h1>My Travel Docs</h1>
     <table>
         <tr>
