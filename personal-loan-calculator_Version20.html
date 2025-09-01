@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Loan Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    .menu-bar { position: fixed; top: 0; right: 0; left: 0; background-color: #ddd; padding: 10px; text-align: right; z-index: 1000; }
+    .menu-bar a { margin-left: 15px; color: #333; text-decoration: none; font-weight: bold; }
+    .menu-bar a:hover { color: #666; }
+    h1 { margin-top: 70px; text-align: center; }
+    .calculator { max-width: 400px; margin: 40px auto; background: #f9f9f9; padding: 30px; border-radius: 10px; box-shadow: 0 2px 8px #ccc; }
+    label { display: block; margin: 15px 0 5px; }
+    input[type="text"], input[type="number"] { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; }
+    button { width: 100%; padding: 10px; background: #4caf50; color: #fff; border: none; border-radius: 5px; font-size: 1em; cursor: pointer; }
+    button:hover { background: #388e3c; }
+    .result { margin-top: 20px; font-size: 1.1em; text-align: center; min-height: 30px; color: #222; }
+  </style>
+  <script>
+    function formatAmount(input) {
+      let value = input.value.replace(/[^0-9]/g, '');
+      if (!value) { input.value = ''; return; }
+      input.value = parseInt(value, 10).toLocaleString('en-US');
+    }
+    function calculatePersonalLoan() {
+      var principal = document.getElementById('personal-principal').value.replace(/[^0-9]/g, '');
+      var interest = parseFloat(document.getElementById('personal-interest').value);
+      var months = parseInt(document.getElementById('personal-months').value);
+      var resultDiv = document.getElementById('personal-result');
+      if (!principal || isNaN(interest) || isNaN(months) || parseInt(principal, 10) <= 0 || interest <= 0 || months <= 0) {
+        resultDiv.innerHTML = 'Please enter valid numbers above zero.';
+        return;
+      }
+      var principalInt = parseInt(principal, 10);
+      var monthlyInterest = (Math.round(interest * 100) / 100) / 100 / 12;
+      var monthly = (principalInt * monthlyInterest * Math.pow(1 + monthlyInterest, months)) / (Math.pow(1 + monthlyInterest, months) - 1);
+      if (!isFinite(monthly)) {
+        resultDiv.innerHTML = 'Calculation error. Please check your inputs.';
+      } else {
+        resultDiv.innerHTML = 'Estimated monthly payment: <b>R ' + monthly.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</b>';
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="menu-bar">
+    <a href="traveldoc.html">Family Zone</a>
+    <a href="library.html">My Library</a>
+    <a href="home-loan-calculator.html">Home Loan Calculator</a>
+    <a href="personal-loan-calculator.html">Personal Loan Calculator</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <h1>Personal Loan Calculator</h1>
+  <div class="calculator">
+    <label for="personal-principal">Loan Amount (Rands):</label>
+    <input type="text" id="personal-principal" inputmode="numeric" placeholder="Enter loan amount" oninput="formatAmount(this)" autocomplete="off">
+    <label for="personal-interest">Annual Interest Rate (%):</label>
+    <input type="number" id="personal-interest" min="0.01" step="0.01" max="100" placeholder="e.g. 15.00">
+    <label for="personal-months">Loan Term (Months):</label>
+    <input type="number" id="personal-months" min="1" placeholder="Enter number of months">
+    <button type="button" onclick="calculatePersonalLoan()">Calculate</button>
+    <div class="result" id="personal-result"></div>
+  </div>
+</body>
+</html>
