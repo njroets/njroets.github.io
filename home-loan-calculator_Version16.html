@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Loan & Affordability Calculator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    .menu-bar {
+      position: fixed; top: 0; right: 0; left: 0;
+      background-color: #ddd; padding: 10px; text-align: right; z-index: 1000;
+    }
+    .menu-bar a {
+      margin-left: 15px; color: #333; text-decoration: none; font-weight: bold;
+    }
+    .menu-bar a:hover { color: #666; }
+    h1 { margin-top: 70px; text-align: center; }
+    .tab-container { max-width: 900px; margin: 40px auto; background: #f9f9f9; padding: 0; border-radius: 10px; box-shadow: 0 2px 8px #ccc; }
+    .tabs { display: flex; border-bottom: 1px solid #bbb; border-radius: 10px 10px 0 0; background: #eee; }
+    .tab {
+      flex: 1; padding: 12px; cursor: pointer; text-align: center; border: none; outline: none;
+      background: #eee; font-size: 1.1em; font-weight: bold; color: #333; border-radius: 10px 10px 0 0; transition: background 0.2s;
+    }
+    .tab.active { background: #fff; border-bottom: 3px solid #4caf50; color: #4caf50; }
+    .calculator { padding: 28px 28px 10px 28px; }
+    .loan-scenarios { display: flex; gap: 32px; justify-content: space-between; }
+    .scenario { flex: 1; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 4px #eee; }
+    label { display: block; margin: 15px 0 5px; }
+    input[type="text"], input[type="number"], select {
+      width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box;
+    }
+    button {
+      width: 100%; padding: 10px; background: #4caf50; color: #fff;
+      border: none; border-radius: 5px; font-size: 1em; cursor: pointer;
+    }
+    button:hover { background: #388e3c; }
+    .result { margin-top: 20px; font-size: 1.1em; text-align: center; min-height: 30px; color: #222; }
+    .result-label { display: block; font-weight: bold; margin-top: 10px; }
+    .result-value { font-size: 1.2em; color: #0b4; }
+    .compare-result { text-align: center; font-weight: bold; margin: 24px 0; }
+    .action-row { display: flex; gap: 16px; margin-top: 18px; justify-content: center; }
+    @media (max-width: 800px) {
+      .loan-scenarios { flex-direction: column; gap: 0; }
+      .scenario { margin-bottom: 25px; }
+    }
+  </style>
+  <script>
+    let lastQualifyAmount = 0;
+
+    function switchTab(tabIndex) {
+      document.getElementById('tab-afford').classList.remove('active');
+      document.getElementById('tab-loan').classList.remove('active');
+      document.getElementById('calculator-afford').style.display = 'none';
+      document.getElementById('calculator-loan').style.display = 'none';
+      if(tabIndex === 0){
+        document.getElementById('tab-afford').classList.add('active');
+        document.getElementById('calculator-afford').style.display = 'block';
+      } else {
+        document.getElementById('tab-loan').classList.add('active');
+        document.getElementById('calculator-loan').style.display = 'block';
+      }
+    }
+
+    // Format input with thousands separator, only whole numbers allowed
+    function formatAmount(input) {
+      let value = input.value.replace(/[^0-9]/g, '');
+      if (!value) { input.value = ''; return; }
+      input.value = parseInt(value, 10).toLocaleString('en-US');
+    }
+
+    function calculateLoan(suffix) {
+      var principal = document.getElementById('principal'+suffix).value.replace(/[^0-9]/g, '');
+      var interest = parseFloat(document.getElementById('interest'+suffix).value);
+      var months = parseInt(document.getElementById('months'+suffix).value);
+      var resultDiv = document.getElementById('result-loan'+suffix);
+
+      if (!principal || isNaN(interest) || isNaN(months) || parseInt(principal, 10) <= 0 || interest <= 0 || months <= 0) {
+        resultDiv.innerHTML = 'Please enter valid numbers above zero.';
+        return;
+      }
+
+      var principalInt = parseInt(principal, 10);
+      var monthlyInterest = (Math.round(interest * 100) / 100) / 100 / 12;
+      var monthly = (principalInt * monthlyInterest * Math.pow(1 + monthlyInterest, months)) / (Math.pow(1 + monthlyInterest, months) - 1);
+
+      if (!isFinite(monthly)) {
+        resultDiv.innerHTML = 'Calculation error. Please check your inputs.';
+      } else {
+        resultDiv.innerHTML = 'Estimated monthly payment: <b>R ' + monthly.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</b>';
+      }
+      // Save for PDF
+      window['lastLoanResult'+suffix] = { principal: principalInt, interest, months, monthly: monthly || 0 };
+      compareLoans();
+    }
+
+    function compareLoans() {
+      // Compare the two loan results if both available
+      let a = window.lastLoanResultA, b = window.lastLoanResultB;
+      let el = document.getElementById('compare-result');
+      if (a && b) {
+        let monthlyDiff = Math.abs((a.monthly || 0) - (b.monthly || 0));
+        let totalDiff = Math.abs((a.principal || 0) - (b.principal || 0));
+        el.innerHTML = "Difference: Monthly payment = R " + monthlyDiff.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) +
+          " | Loan amount = R " + totalDiff.toLocaleString('en-US');
+      } else {
+        el.innerHTML = "";
+      }
+    }
+
+    function calculateAffordability() {
+      var gross = document.getElementById('afford-gross').value.replace(/[^0-9]/g, '');
+      var deposit = document.getElementById('afford-deposit').value.replace(/[^0-9]/g, '');
+      var interest = parseFloat(document.getElementById('afford-interest').value);
+      var years = parseInt(document.getElementById('afford-years').value);
+      var resultDiv = document.getElementById('result-afford');
+      if (!gross || isNaN(interest) || isNaN(years) || parseInt(gross, 10) <= 0 || interest <= 0) {
+        resultDiv.innerHTML = 'Please enter valid numbers above zero.';
+        return;
+      }
+      var grossInt = parseInt(gross, 10);
+      var depositInt = deposit ? parseInt(deposit, 10) : 0;
+      var months = years * 12;
+      var monthlyInstalment = grossInt * 0.35;
+      var monthlyInterest = (Math.round(interest * 100) / 100) / 100 / 12;
+      var denom = monthlyInterest * Math.pow(1 + monthlyInterest, months);
+      var maxLoan = 0;
+      if(denom !== 0) {
+        maxLoan = (monthlyInstalment * (Math.pow(1 + monthlyInterest, months) - 1)) / denom;
+      }
+      maxLoan += depositInt;
+      if (!isFinite(maxLoan) || maxLoan <= 0) {
+        resultDiv.innerHTML = 'Calculation error. Please check your inputs.';
+      } else {
+        resultDiv.innerHTML =
+          '<span class="result-label">Monthly instalment:</span>' +
+          '<span class="result-value">R ' + monthlyInstalment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</span><br>' +
+          '<span class="result-label">You could qualify for a home loan of up to:</span>' +
+          '<span class="result-value" id="qualify-amount">R ' + Math.round(maxLoan).toLocaleString('en-US') + '</span>' +
+          '<br><button onclick="useQualifyAmount()" style="margin-top:14px;padding:7px 16px;font-size:1em;">Use this value in Loan Calculator</button>';
+        lastQualifyAmount = Math.round(maxLoan);
+      }
+    }
+
+    function useQualifyAmount() {
+      if (lastQualifyAmount && document.getElementById('principalA')) {
+        document.getElementById('principalA').value = lastQualifyAmount.toLocaleString('en-US');
+        switchTab(1);
+      }
+    }
+
+    function downloadLoanPDF(suffix) {
+      const { jsPDF } = window.jspdf;
+      let a = window['lastLoanResult'+suffix];
+      if (!a) { alert("Please calculate first."); return; }
+      let doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text("Loan Calculator Result", 14, 18);
+      doc.setFontSize(13);
+      doc.text("Loan Amount: R " + (a.principal || 0).toLocaleString('en-US'), 14, 32);
+      doc.text("Annual Interest Rate: " + (a.interest || 0) + " %", 14, 42);
+      doc.text("Term: " + (a.months || 0) + " months", 14, 52);
+      doc.text("Monthly Payment: R " + (a.monthly || 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}), 14, 62);
+      doc.save("Loan-Calculator-Result.pdf");
+    }
+
+    function emailLoanPDF(suffix) {
+      // For security, client-side can't email attachments directly.
+      // Option 1: mailto: (not attachment, but can prefill text)
+      let a = window['lastLoanResult'+suffix];
+      if (!a) { alert("Please calculate first."); return; }
+      let body = encodeURIComponent(
+        "Loan Amount: R " + (a.principal || 0).toLocaleString('en-US') + "\n" +
+        "Annual Interest Rate: " + (a.interest || 0) + "%\n" +
+        "Term: " + (a.months || 0) + " months\n" +
+        "Monthly Payment: R " + (a.monthly || 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})
+      );
+      window.location.href = "mailto:?subject=Loan Calculator Result&body=" + body;
+      // Option 2: Integrate with backend/email service for actual PDF emailing (not possible client-side only).
+    }
+
+    function checkCreditScore() {
+      window.open("https://www.transunion.co.za/product/credit-score", "_blank");
+    }
+
+    window.onload = function() { switchTab(0); }
+  </script>
+</head>
+<body>
+  <div class="menu-bar">
+    <a href="traveldoc.html">Family Zone</a>
+    <a href="library.html">My Library</a>
+    <a href="home-loan-calculator.html">Home Loan Calculator</a>
+    <a href="personal-loan-calculator.html">Personal Loan Calculator</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <h1>Home Loan & Affordability Calculator</h1>
+  <div class="tab-container">
+    <div class="tabs">
+      <button id="tab-afford" class="tab active" onclick="switchTab(0)">Affordability</button>
+      <button id="tab-loan" class="tab" onclick="switchTab(1)">Loan Calculator</button>
+    </div>
+    <div id="calculator-afford" class="calculator">
+      <label for="afford-gross">Combined gross/pre-tax household income (Rands):</label>
+      <input type="text" id="afford-gross" inputmode="numeric" placeholder="Enter gross income" oninput="formatAmount(this)" autocomplete="off">
+      <label for="afford-deposit">Deposit (Rands):</label>
+      <input type="text" id="afford-deposit" inputmode="numeric" placeholder="Enter deposit" oninput="formatAmount(this)" autocomplete="off">
+      <label for="afford-interest">Annual Interest Rate (%):</label>
+      <input type="number" id="afford-interest" min="0.01" step="0.01" max="100" placeholder="e.g. 10.50" pattern="^\\d+(\\.\\d{1,2})?$">
+      <label for="afford-years">Loan Term (Years):</label>
+      <select id="afford-years"><option value="10">10</option><option value="20">20</option><option value="30">30</option></select>
+      <button type="button" onclick="calculateAffordability()">Calculate</button>
+      <div class="result" id="result-afford"></div>
+    </div>
+    <div id="calculator-loan" class="calculator" style="display:none">
+      <div class="loan-scenarios">
+        <div class="scenario">
+          <h3>Scenario 1</h3>
+          <label for="principalA">Loan Amount (Rands):</label>
+          <input type="text" id="principalA" inputmode="numeric" placeholder="Enter loan amount" oninput="formatAmount(this)" autocomplete="off">
+          <label for="interestA">Annual Interest Rate (%):</label>
+          <input type="number" id="interestA" min="0.01" step="0.01" max="100" placeholder="e.g. 10.50">
+          <label for="monthsA">Loan Term (Months):</label>
+          <input type="number" id="monthsA" min="1" placeholder="Enter number of months">
+          <button type="button" onclick="calculateLoan('A')">Calculate</button>
+          <div class="result" id="result-loanA"></div>
+          <div class="action-row">
+            <button onclick="downloadLoanPDF('A')">Download PDF</button>
+            <button onclick="emailLoanPDF('A')">Email Result</button>
+            <button onclick="checkCreditScore()">Check Credit Score</button>
+          </div>
+        </div>
+        <div class="scenario">
+          <h3>Scenario 2</h3>
+          <label for="principalB">Loan Amount (Rands):</label>
+          <input type="text" id="principalB" inputmode="numeric" placeholder="Enter loan amount" oninput="formatAmount(this)" autocomplete="off">
+          <label for="interestB">Annual Interest Rate (%):</label>
+          <input type="number" id="interestB" min="0.01" step="0.01" max="100" placeholder="e.g. 10.50">
+          <label for="monthsB">Loan Term (Months):</label>
+          <input type="number" id="monthsB" min="1" placeholder="Enter number of months">
+          <button type="button" onclick="calculateLoan('B')">Calculate</button>
+          <div class="result" id="result-loanB"></div>
+          <div class="action-row">
+            <button onclick="downloadLoanPDF('B')">Download PDF</button>
+            <button onclick="emailLoanPDF('B')">Email Result</button>
+            <button onclick="checkCreditScore()">Check Credit Score</button>
+          </div>
+        </div>
+      </div>
+      <div id="compare-result" class="compare-result"></div>
+    </div>
+  </div>
+</body>
+</html>
